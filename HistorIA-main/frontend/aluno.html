@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HistorIA - Dashboard Aluno</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h1>📚 HistorIA - Aluno</h1>
+    <div class="user-info">
+      <div>
+        <span id="userName">Carregando...</span><br>
+        <span style="font-size: 0.85rem;">⭐ XP: <span id="userXP">0</span></span>
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="fazerLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="alert" class="alert"></div>
+
+    <!-- TABS DE NAVEGAÇÃO -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="mostrarAba('trilhas', this)">🎓 Trilhas</button>
+      <button class="tab-button" onclick="mostrarAba('exercicio', this)">❓ Exercício Atual</button>
+      <button class="tab-button" onclick="mostrarAba('historico', this)">📊 Histórico</button>
+    </div>
+
+    <!-- ABA TRILHAS -->
+    <div id="trilhas" class="tab-content active">
+      <div class="card">
+        <div class="card-title">Minhas Trilhas de Aprendizado</div>
+        <div class="card-body">
+          <div id="listaTrilhas" class="grid grid-2">
+            <div class="loader"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA EXERCÍCIO ATUAL -->
+    <div id="exercicio" class="tab-content">
+      <div id="semTrilha" class="card">
+        <div class="card-body" style="text-align: center; padding: 3rem;">
+          <p style="font-size: 1.2rem; color: #718096;">📚 Selecione uma trilha para começar</p>
+        </div>
+      </div>
+
+      <div id="exercicioContainer" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <div>
+              <span id="trilhaTitulo">Trilha</span><br>
+              <span style="font-size: 0.9rem; color: #718096; font-weight: normal;">
+                Fase <span id="faseAtual">1</span> de <span id="fasesTotal">1</span>
+                &nbsp;·&nbsp;
+                Questão <span id="questaoAtual">1</span> de <span id="questoesTotal">3</span>
+              </span>
+            </div>
+            <div style="text-align: right;">
+              <button class="btn btn-secondary btn-small" onclick="mostrarAba('trilhas', this)">← Voltar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h3 id="pergunta" style="margin-bottom: 2rem; font-size: 1.2rem;">Carregando pergunta...</h3>
+
+            <div class="grid grid-2" id="opcoes" style="gap: 1rem; margin-bottom: 2rem;">
+              <!-- Opções inseridas pelo JS -->
+            </div>
+
+            <div id="feedback" class="alert" style="margin-bottom: 1rem;">
+              <span id="feedbackTexto"></span>
+            </div>
+
+            <div class="btn-group">
+              <button id="btnProxima" class="btn btn-primary" onclick="proximaQuestao()" style="display: none;">
+                Próxima Questão →
+              </button>
+              <button id="btnConcluir" class="btn btn-success" onclick="concluirFase()" style="display: none;">
+                🎉 Concluir Trilha
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA HISTÓRICO -->
+    <div id="historico" class="tab-content">
+      <div class="card">
+        <div class="card-title">Histórico de Respostas</div>
+        <div class="card-body">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f7fafc; border-bottom: 2px solid #e2e8f0;">
+                <th style="padding: 1rem; text-align: left;">Pergunta</th>
+                <th style="padding: 1rem; text-align: center;">Resultado</th>
+                <th style="padding: 1rem; text-align: center;">XP</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaHistorico">
+              <tr>
+                <td colspan="3" style="text-align: center; padding: 2rem; color: #718096;">
+                  Carregando histórico...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/aluno.js"></script>
+</body>
+</html>

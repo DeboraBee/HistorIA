@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HistorIA - Dashboard Professor</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="header">
+    <h1>📚 HistorIA - Professor</h1>
+    <div class="user-info">
+      <span id="userName">Carregando...</span>
+      <button class="btn btn-secondary btn-small" onclick="fazerLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="alert" class="alert"></div>
+
+    <!-- TABS DE NAVEGAÇÃO -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="mostrarAba('alunos')">👨‍🎓 Alunos</button>
+      <button class="tab-button" onclick="mostrarAba('trilhas')">🎓 Trilhas</button>
+      <button class="tab-button" onclick="mostrarAba('exercicios')">❓ Exercícios</button>
+    </div>
+
+    <!-- ABA ALUNOS -->
+    <div id="alunos" class="tab-content active">
+      <div class="card">
+        <div class="card-title">
+          <div>Gerenciar Alunos</div>
+          <button class="btn btn-primary btn-small" onclick="abrirModalAluno()">+ Novo Aluno</button>
+        </div>
+        <div class="card-body">
+          <div class="grid grid-2" id="listaAlunos">
+            <div class="loader"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA TRILHAS -->
+    <div id="trilhas" class="tab-content">
+      <div class="card">
+        <div class="card-title">
+          <div>Minhas Trilhas</div>
+          <button class="btn btn-primary btn-small" onclick="abrirModalTrilha()">+ Nova Trilha</button>
+        </div>
+        <div class="card-body">
+          <div class="grid grid-2" id="listaTrilhas">
+            <div class="loader"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA EXERCÍCIOS -->
+    <div id="exercicios" class="tab-content">
+      <div class="card">
+        <div class="card-title">Gerar Exercícios com IA</div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="temaTrilha">Selecionar Trilha</label>
+            <select id="temaTrilha" onchange="atualizarFases()">
+              <option value="">Escolha uma trilha...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="faseSelecionada">Fase</label>
+            <select id="faseSelecionada">
+              <option value="">Escolha uma fase...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="temaIA">Tema para Geração de IA</label>
+            <input type="text" id="temaIA" placeholder="Ex: Revolução Francesa">
+          </div>
+
+          <div class="form-group">
+            <label for="quantidadeQuestoes">Quantidade de Questões</label>
+            <input type="number" id="quantidadeQuestoes" value="3" min="1" max="10">
+          </div>
+
+          <button class="btn btn-primary" onclick="gerarExerciciosIA()">Gerar Questões com IA</button>
+        </div>
+      </div>
+
+      <div id="resultadoIA" class="card" style="display: none; margin-top: 2rem;">
+        <div class="card-title">Questões Geradas</div>
+        <div class="card-body" id="questoesGeradas"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOVO ALUNO -->
+  <div id="modalAluno" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Adicionar Aluno</h2>
+        <button class="modal-close" onclick="fecharModal('modalAluno')">×</button>
+      </div>
+      <div class="form-group">
+        <label for="nomeAluno">Nome</label>
+        <input type="text" id="nomeAluno" placeholder="Nome do aluno">
+      </div>
+      <div class="form-group">
+        <label for="emailAluno">Email</label>
+        <input type="email" id="emailAluno" placeholder="email@escola.com">
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="submeterCriarAluno()">Criar Aluno</button>
+        <button class="btn btn-secondary" onclick="fecharModal('modalAluno')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOVA TRILHA -->
+  <div id="modalTrilha" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nova Trilha</h2>
+        <button class="modal-close" onclick="fecharModal('modalTrilha')">×</button>
+      </div>
+      <div class="form-group">
+        <label for="nomeTrilha">Nome da Trilha</label>
+        <input type="text" id="nomeTrilha" placeholder="Ex: Brasil Colônia">
+      </div>
+      <div id="fasesInput">
+        <label>Fases</label>
+        <div id="listaFases"></div>
+        <button class="btn btn-secondary btn-small" type="button" onclick="adicionarFaseInput()">+ Adicionar Fase</button>
+      </div>
+      <div class="btn-group" style="margin-top: 1rem;">
+        <button class="btn btn-primary" onclick="submeterCriarTrilha()">Criar Trilha</button>
+        <button class="btn btn-secondary" onclick="fecharModal('modalTrilha')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/professor.js"></script>
+</body>
+</html>

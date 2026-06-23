@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "titulo": "Brasil Colônia",
+    "aulas": [
+      {"ordem":1,"tema":"Chegada dos portugueses"},
+      {"ordem":2,"tema":"Ciclo do pau-brasil"}
+    ]
+  },
+  {
+    "id": 2,
+    "titulo": "Brasil Império",
+    "aulas": [
+      {"ordem":1,"tema":"Independência do Brasil"}
+    ]
+  }
+]

@@ -1,0 +1,67 @@
+services:
+
+  auth:
+    build: ./services/auth
+    ports:
+      - "8005:8000"
+    volumes:
+      - auth_data:/app/data
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+    restart: unless-stopped
+
+  exercicios:
+    build: ./services/exercicios
+    ports:
+      - "8001:8000"
+    volumes:
+      - exercicios_data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - alunos
+      - trilhas
+    restart: unless-stopped
+
+  alunos:
+    build: ./services/alunos
+    ports:
+      - "8002:8000"
+    volumes:
+      - alunos_data:/app/data
+    restart: unless-stopped
+
+  conteudos:
+    build: ./services/conteudos
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
+
+  trilhas:
+    build: ./services/trilhas
+    ports:
+      - "8004:8000"
+    volumes:
+      - trilhas_data:/app/data
+    restart: unless-stopped
+
+  gateway:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - auth
+      - alunos
+      - exercicios
+      - conteudos
+      - trilhas
+    restart: unless-stopped
+
+volumes:
+  auth_data:
+  alunos_data:
+  exercicios_data:
+  trilhas_data:
