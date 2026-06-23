@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 pydantic
+pika
 pytest
 pytest-asyncio
 httpx

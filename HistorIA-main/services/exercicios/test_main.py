@@ -99,13 +99,11 @@ class TestExerciciosAPI:
         assert response.status_code == 400
         assert "Resposta inválida" in response.json()["detail"]
     
-    @patch('app.alunos_client.enviar_resultado')
-    @patch('app.trilhas_client.avancar_fase')
-    def test_jogar_resposta_correta(self, mock_avancar, mock_enviar, client):
+    @patch('app.rabbitmq_publisher.publicar_resposta')
+    def test_jogar_resposta_correta(self, mock_publicar, client):
         """Testa fluxo de jogo com resposta correta"""
-        mock_enviar.return_value = {"data": 10}
-        mock_avancar.return_value = {"fase": 2}
-        
+        mock_publicar.return_value = None
+
         response = client.post("/jogar", json={
             "aluno_id": 1,
             "trilha_id": 1,
@@ -114,9 +112,12 @@ class TestExerciciosAPI:
             "resposta_usuario": 1,
             "resposta_correta": 1
         })
-        
-        # Pode ter sucesso ou falhar se banco não está pronto
-        assert response.status_code in [200, 500]
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["success"] is True
+        assert data["data"]["correta"] is True
+        mock_publicar.assert_called_once_with(1, 1, True)
     
     def test_jogar_resposta_invalida(self, client):
         """Testa fluxo de jogo com resposta inválida"""

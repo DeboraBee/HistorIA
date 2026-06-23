@@ -2,8 +2,7 @@ from fastapi import FastAPI, HTTPException
 from app.database import get_db, init_db
 from app.schemas import GerarRequest, JogarRequest
 from app.ai_client import gerar_questoes
-from app.alunos_client import enviar_resultado
-from app.trilhas_client import avancar_fase
+from app.rabbitmq_publisher import publicar_resposta
 
 app = FastAPI(root_path="/exercicios")
 
@@ -30,7 +29,7 @@ def jogar(req: JogarRequest):
 
     correta = req.resposta_usuario == req.resposta_correta
 
-    # 1. Salva histórico
+    # 1. Salva histórico local
     with get_db() as db:
         db.execute(
             """
@@ -38,24 +37,14 @@ def jogar(req: JogarRequest):
                 (aluno_id, pergunta, resposta_usuario, resposta_correta, acertou)
             VALUES (?, ?, ?, ?, ?)
             """,
-            (req.aluno_id, req.pergunta, req.resposta_usuario, req.resposta_correta, correta)
+            (req.aluno_id, req.pergunta, req.resposta_usuario, req.resposta_correta, correta),
         )
         db.commit()
 
-    # 2. Atualiza XP no serviço de alunos
-    resultado_xp = enviar_resultado(req.aluno_id, correta)
+    # 2. Publica evento — alunos e trilhas atualizam de forma assíncrona
+    publicar_resposta(req.aluno_id, req.trilha_id, correta)
 
-    # 3. Avança fase SE acertou
-    progresso = avancar_fase(req.aluno_id, req.trilha_id) if correta else None
-
-    return {
-        "success": True,
-        "data": {
-            "correta": correta,
-            "xp": resultado_xp["data"] if resultado_xp else None,
-            "progresso": progresso
-        }
-    }
+    return {"success": True, "data": {"correta": correta}}
 
 
 @app.get("/historico/{aluno_id}")

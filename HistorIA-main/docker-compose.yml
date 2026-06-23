@@ -1,5 +1,20 @@
 services:
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI (admin/admin)
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   auth:
     build: ./services/auth
     ports:
@@ -16,11 +31,17 @@ services:
       - "8001:8000"
     volumes:
       - exercicios_data:/app/data
+    environment:
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
     env_file:
       - .env
     depends_on:
-      - alunos
-      - trilhas
+      rabbitmq:
+        condition: service_healthy
+      alunos:
+        condition: service_started
+      trilhas:
+        condition: service_started
     restart: unless-stopped
 
   alunos:
@@ -29,6 +50,11 @@ services:
       - "8002:8000"
     volumes:
       - alunos_data:/app/data
+    environment:
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   conteudos:
@@ -43,6 +69,11 @@ services:
       - "8004:8000"
     volumes:
       - trilhas_data:/app/data
+    environment:
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   gateway:

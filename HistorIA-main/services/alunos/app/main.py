@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from app.database import get_db, init_db
 from app.schemas import AlunoCreate, AlunoUpdate, RespostaRequest
+from app.rabbitmq_consumer import iniciar_consumer
 
 app = FastAPI(
     root_path="/alunos",
@@ -12,6 +13,7 @@ app = FastAPI(
 @app.on_event("startup")
 def startup():
     init_db()
+    iniciar_consumer()
 
 
 @app.get("/")
