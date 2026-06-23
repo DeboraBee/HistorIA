@@ -1,4 +1,3 @@
-testeteste
 # HistorIA
 
 Plataforma educacional gamificada para ensino de História, inspirada no Duolingo.
