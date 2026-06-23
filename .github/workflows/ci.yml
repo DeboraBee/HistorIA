@@ -7,10 +7,9 @@ on:
   pull_request:
     branches: [main]
 
-# Variáveis globais reutilizadas nos jobs de push
+# Docker exige nomes de imagem em minúsculas; o owner é calculado via bash em cada job.
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/historia
 
 jobs:
   # ─────────────────────────────────────────────────────────
