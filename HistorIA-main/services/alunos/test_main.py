@@ -119,7 +119,7 @@ class TestAlunosAPI:
             "nome": "Primeiro",
             "email": email
         })
-        assert response1.status_code == 200
+        assert response1.status_code == 201
         
         # Segunda criação com mesmo email deve ser rejeitada
         response2 = client.post("/", json={

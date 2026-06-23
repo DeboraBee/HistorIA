@@ -74,9 +74,9 @@ class TestTrilhasAPI:
             "nome": "Trilha 1",
             "professor_id": 1
         })
-        assert create_response.status_code == 200
+        assert create_response.status_code == 201
         trilha_id = create_response.json()["data"]["id"]
-        
+
         # Lista
         response = client.get("/")
         assert response.status_code == 200
@@ -100,7 +100,7 @@ class TestTrilhasAPI:
         # Cria todas
         for trilha in trilhas:
             response = client.post("/", json=trilha)
-            assert response.status_code == 200
+            assert response.status_code == 201
             created_ids.append(response.json()["data"]["id"])
         
         # Lista
