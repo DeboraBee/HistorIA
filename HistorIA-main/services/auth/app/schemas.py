@@ -16,6 +16,7 @@ class LoginRequest(BaseModel):
 class UsuarioResponse(BaseModel):
     id: int
     nome: str
+    email: str
     tipo: str
 
 

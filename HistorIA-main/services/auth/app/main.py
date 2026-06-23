@@ -70,7 +70,9 @@ def login(dados: LoginRequest):
     return LoginResponse(
         success=True,
         token=token,
-        data=UsuarioResponse(id=user["id"], nome=user["nome"], tipo=user["tipo"]),
+        data=UsuarioResponse(
+            id=user["id"], nome=user["nome"], email=user["email"], tipo=user["tipo"]
+        ),
     )
 
 
