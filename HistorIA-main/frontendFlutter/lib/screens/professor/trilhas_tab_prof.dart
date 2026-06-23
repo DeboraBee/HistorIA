@@ -46,14 +46,16 @@ class _TrilhasTabProfState extends State<TrilhasTabProf> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Deletar Trilha'),
-        content: Text('Deseja deletar "${t.nome}"?\nEsta ação não pode ser desfeita.'),
+        content: Text(
+            'Deseja deletar "${t.nome}"?\nEsta ação não pode ser desfeita.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('Cancelar')),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Deletar', style: TextStyle(color: Colors.red))),
+              child: const Text('Deletar',
+                  style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -64,8 +66,7 @@ class _TrilhasTabProfState extends State<TrilhasTabProf> {
       await ApiService.deletarTrilha(t.id, token);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ Trilha deletada!'),
-                backgroundColor: Colors.green));
+            const SnackBar(content: Text('Trilha removida com sucesso.')));
         _carregar();
       }
     } on ApiException catch (e) {
@@ -106,8 +107,8 @@ class _TrilhasTabProfState extends State<TrilhasTabProf> {
                             child: ListTile(
                               leading: const CircleAvatar(
                                 backgroundColor: Color(0xFF667EEA),
-                                child:
-                                    Icon(Icons.school, color: Colors.white),
+                                child: Icon(Icons.route_outlined,
+                                    color: Colors.white),
                               ),
                               title: Text(t.nome,
                                   style: const TextStyle(

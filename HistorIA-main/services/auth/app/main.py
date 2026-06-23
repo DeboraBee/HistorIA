@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
@@ -7,35 +9,26 @@ from app.database import get_db, init_db
 from app.schemas import UsuarioCreate, LoginRequest, LoginResponse, UsuarioResponse
 from app.security import hash_senha, verificar_senha, criar_token, decodificar_token
 
-app = FastAPI(root_path="/auth")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(root_path="/auth", lifespan=lifespan)
 Instrumentator().instrument(app).expose(app)
 bearer = HTTPBearer()
 
 
-@app.on_event("startup")
-def startup():
-    init_db()
-
-
-# ── Dependência reutilizável ──────────────────────────────────────────────────
-
 def usuario_autenticado(
     credentials: HTTPAuthorizationCredentials = Depends(bearer),
 ) -> dict:
-    """
-    Valida o Bearer token e retorna o payload.
-    Use como dependência em qualquer endpoint que exija login:
-        @app.get("/rota")
-        def rota(usuario = Depends(usuario_autenticado)):
-            ...
-    """
     try:
         return decodificar_token(credentials.credentials)
     except JWTError:
         raise HTTPException(status_code=401, detail="Token inválido ou expirado")
 
-
-# ── Rotas públicas ────────────────────────────────────────────────────────────
 
 @app.post("/registrar", status_code=201)
 def registrar(usuario: UsuarioCreate):
@@ -71,19 +64,20 @@ def login(dados: LoginRequest):
         success=True,
         token=token,
         data=UsuarioResponse(
-            id=user["id"], nome=user["nome"], email=user["email"], tipo=user["tipo"]
+            id=user["id"],
+            nome=user["nome"],
+            email=user["email"],
+            tipo=user["tipo"],
         ),
     )
 
 
-# ── Rota protegida de exemplo ─────────────────────────────────────────────────
-
 @app.get("/me")
 def me(payload: dict = Depends(usuario_autenticado)):
-    """Retorna os dados do usuário logado a partir do token."""
     with get_db() as db:
         user = db.execute(
-            "SELECT id, nome, tipo FROM usuarios WHERE id = ?", (payload["sub"],)
+            "SELECT id, nome, email, tipo FROM usuarios WHERE id = ?",
+            (payload["sub"],),
         ).fetchone()
 
     if not user:

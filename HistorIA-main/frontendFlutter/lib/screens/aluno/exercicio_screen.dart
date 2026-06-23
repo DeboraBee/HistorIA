@@ -102,7 +102,7 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
         _questaoAtual = 1;
       });
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('🎯 Fase ${indiceFase + 2} iniciada!'),
+        content: Text('Fase ${indiceFase + 2} iniciada'),
         backgroundColor: Colors.blue,
       ));
     } else {
@@ -117,13 +117,15 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
-        title: const Text('🎉 Parabéns!'),
+        icon: const Icon(Icons.emoji_events_outlined,
+            size: 48, color: Color(0xFF667EEA)),
+        title: const Text('Parabéns!'),
         content: const Text('Você completou toda a trilha!'),
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // fecha dialog
-              Navigator.pop(context); // volta para trilhas
+              Navigator.pop(context);
+              Navigator.pop(context);
             },
             child: const Text('Voltar às Trilhas'),
           ),
@@ -138,7 +140,7 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('📚 ${widget.trilha.nome}'),
+        title: Text(widget.trilha.nome),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(24),
           child: Padding(
@@ -182,14 +184,21 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: _proxima,
-                child: Text(
+                icon: Icon(
                   _questaoAtual >= _questoesPorFase &&
                           widget.fases.indexOf(_faseAtual) >=
                               widget.fases.length - 1
-                      ? '🎉 Concluir Trilha'
-                      : 'Próxima Questão →',
+                      ? Icons.check_circle_outline
+                      : Icons.arrow_forward,
+                ),
+                label: Text(
+                  _questaoAtual >= _questoesPorFase &&
+                          widget.fases.indexOf(_faseAtual) >=
+                              widget.fases.length - 1
+                      ? 'Concluir Trilha'
+                      : 'Próxima Questão',
                 ),
               ),
             ),
@@ -238,7 +247,8 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
                       fontSize: 13)),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(q.opcoes[idx], style: const TextStyle(fontSize: 15))),
+            Expanded(
+                child: Text(q.opcoes[idx], style: const TextStyle(fontSize: 15))),
           ],
         ),
       ),
@@ -254,13 +264,24 @@ class _ExercicioScreenState extends State<ExercicioScreen> {
             color: _acertou! ? Colors.green : Colors.red, width: 1.5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        _acertou!
-            ? '✅ Acertou! +10 XP'
-            : '❌ Errou! Resposta correta: ${_questao!.opcoes[_questao!.respostaCorreta]}',
-        style: TextStyle(
-            color: _acertou! ? Colors.green[800] : Colors.red[800],
-            fontWeight: FontWeight.w600),
+      child: Row(
+        children: [
+          Icon(
+            _acertou! ? Icons.check_circle_outline : Icons.cancel_outlined,
+            color: _acertou! ? Colors.green[700] : Colors.red[700],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _acertou!
+                  ? 'Resposta correta! +10 XP'
+                  : 'Resposta incorreta. Certa: ${_questao!.opcoes[_questao!.respostaCorreta]}',
+              style: TextStyle(
+                  color: _acertou! ? Colors.green[800] : Colors.red[800],
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
       ),
     );
   }

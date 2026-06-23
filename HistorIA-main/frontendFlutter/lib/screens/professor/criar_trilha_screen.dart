@@ -18,21 +18,18 @@ class _CriarTrilhaScreenState extends State<CriarTrilhaScreen> {
   @override
   void initState() {
     super.initState();
-    _adicionarFase(); // começa com uma fase
+    _adicionarFase();
   }
 
   @override
   void dispose() {
     _nomeTrilhaCtrl.dispose();
-    for (final c in _fasesCtrls) {
-      c.dispose();
-    }
+    for (final c in _fasesCtrls) { c.dispose(); }
     super.dispose();
   }
 
-  void _adicionarFase() {
-    setState(() => _fasesCtrls.add(TextEditingController()));
-  }
+  void _adicionarFase() =>
+      setState(() => _fasesCtrls.add(TextEditingController()));
 
   void _removerFase(int idx) {
     if (_fasesCtrls.length <= 1) return;
@@ -57,8 +54,8 @@ class _CriarTrilhaScreenState extends State<CriarTrilhaScreen> {
 
     setState(() => _loading = true);
     try {
-      final auth = context.read<AuthProvider>();
-      final token = auth.token!;
+      final auth       = context.read<AuthProvider>();
+      final token      = auth.token!;
       final professorId = auth.usuario!.id;
 
       final trilhaId = await ApiService.criarTrilha(nome, professorId, token);
@@ -70,7 +67,7 @@ class _CriarTrilhaScreenState extends State<CriarTrilhaScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('✅ Trilha e fases criadas com sucesso!'),
+          content: Text('Trilha criada com sucesso!'),
           backgroundColor: Colors.green));
       Navigator.pop(context);
     } on ApiException catch (e) {
@@ -100,6 +97,7 @@ class _CriarTrilhaScreenState extends State<CriarTrilhaScreen> {
               decoration: const InputDecoration(
                 labelText: 'Nome da trilha',
                 hintText: 'Ex: Revolução Francesa',
+                prefixIcon: Icon(Icons.route_outlined),
               ),
               textInputAction: TextInputAction.next,
             ),

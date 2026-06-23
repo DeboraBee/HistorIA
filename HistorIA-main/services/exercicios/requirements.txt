@@ -7,3 +7,4 @@ prometheus-fastapi-instrumentator
 pytest
 pytest-asyncio
 httpx
+

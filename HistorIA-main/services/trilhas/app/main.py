@@ -1,17 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.database import get_db, init_db
 from app.schemas import TrilhaCreate, FaseCreate, ProgressoCreate, AvancarRequest
 from app.rabbitmq_consumer import iniciar_consumer
 
-app = FastAPI(root_path="/trilhas", docs_url="/docs", openapi_url="/openapi.json")
-Instrumentator().instrument(app).expose(app)
 
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
     iniciar_consumer()
+    yield
+
+
+app = FastAPI(root_path="/trilhas", lifespan=lifespan)
+Instrumentator().instrument(app).expose(app)
 
 
 # ── Trilhas ───────────────────────────────────────────────────────────────────
@@ -28,7 +33,7 @@ def criar_trilha(trilha: TrilhaCreate):
     with get_db() as db:
         cursor = db.execute(
             "INSERT INTO trilhas (nome, professor_id) VALUES (?, ?)",
-            (trilha.nome, trilha.professor_id)
+            (trilha.nome, trilha.professor_id),
         )
         db.commit()
     return {"success": True, "data": {"id": cursor.lastrowid}}
@@ -74,11 +79,13 @@ def criar_fase(fase: FaseCreate):
         try:
             cursor = db.execute(
                 "INSERT INTO fases (trilha_id, nome, ordem) VALUES (?, ?, ?)",
-                (fase.trilha_id, fase.nome, fase.ordem)
+                (fase.trilha_id, fase.nome, fase.ordem),
             )
             db.commit()
         except Exception:
-            raise HTTPException(status_code=400, detail="Já existe uma fase com essa ordem nesta trilha")
+            raise HTTPException(
+                status_code=400, detail="Já existe uma fase com essa ordem nesta trilha"
+            )
 
     return {"success": True, "data": {"id": cursor.lastrowid}}
 
@@ -88,7 +95,7 @@ def listar_fases(trilha_id: int):
     with get_db() as db:
         fases = db.execute(
             "SELECT * FROM fases WHERE trilha_id = ? ORDER BY ordem",
-            (trilha_id,)
+            (trilha_id,),
         ).fetchall()
 
     return {"success": True, "data": [dict(f) for f in fases]}
@@ -101,7 +108,7 @@ def iniciar_trilha(data: ProgressoCreate):
     with get_db() as db:
         existente = db.execute(
             "SELECT id FROM progresso WHERE aluno_id = ? AND trilha_id = ?",
-            (data.aluno_id, data.trilha_id)
+            (data.aluno_id, data.trilha_id),
         ).fetchone()
 
         if existente:
@@ -109,7 +116,7 @@ def iniciar_trilha(data: ProgressoCreate):
 
         primeira_fase = db.execute(
             "SELECT id FROM fases WHERE trilha_id = ? ORDER BY ordem LIMIT 1",
-            (data.trilha_id,)
+            (data.trilha_id,),
         ).fetchone()
 
         if not primeira_fase:
@@ -117,7 +124,7 @@ def iniciar_trilha(data: ProgressoCreate):
 
         db.execute(
             "INSERT INTO progresso (aluno_id, trilha_id, fase_atual) VALUES (?, ?, ?)",
-            (data.aluno_id, data.trilha_id, primeira_fase["id"])
+            (data.aluno_id, data.trilha_id, primeira_fase["id"]),
         )
         db.commit()
 
@@ -129,7 +136,7 @@ def ver_progresso(aluno_id: int, trilha_id: int):
     with get_db() as db:
         progresso = db.execute(
             "SELECT * FROM progresso WHERE aluno_id = ? AND trilha_id = ?",
-            (aluno_id, trilha_id)
+            (aluno_id, trilha_id),
         ).fetchone()
 
     if not progresso:
@@ -143,7 +150,7 @@ def avancar_fase(data: AvancarRequest):
     with get_db() as db:
         progresso = db.execute(
             "SELECT * FROM progresso WHERE aluno_id = ? AND trilha_id = ?",
-            (data.aluno_id, data.trilha_id)
+            (data.aluno_id, data.trilha_id),
         ).fetchone()
 
         if not progresso:
@@ -158,7 +165,7 @@ def avancar_fase(data: AvancarRequest):
             ORDER BY ordem
             LIMIT 1
             """,
-            (data.trilha_id, progresso["fase_atual"])
+            (data.trilha_id, progresso["fase_atual"]),
         ).fetchone()
 
         if not proxima:
@@ -166,7 +173,7 @@ def avancar_fase(data: AvancarRequest):
 
         db.execute(
             "UPDATE progresso SET fase_atual = ? WHERE aluno_id = ? AND trilha_id = ?",
-            (proxima["id"], data.aluno_id, data.trilha_id)
+            (proxima["id"], data.aluno_id, data.trilha_id),
         )
         db.commit()
 

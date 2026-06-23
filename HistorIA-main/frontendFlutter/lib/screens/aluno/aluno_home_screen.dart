@@ -17,7 +17,6 @@ class _AlunoHomeScreenState extends State<AlunoHomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Sincroniza XP ao abrir o home
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthProvider>().atualizarXP();
     });
@@ -25,17 +24,24 @@ class _AlunoHomeScreenState extends State<AlunoHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final usuario = auth.usuario!;
+    final usuario = context.watch<AuthProvider>().usuario!;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('👨‍🎓 ${usuario.nome}'),
+        title: Row(
+          children: [
+            const Icon(Icons.person_outlined, size: 20),
+            const SizedBox(width: 8),
+            Text(usuario.nome),
+          ],
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: Chip(
-              label: Text('⭐ ${usuario.xp} XP',
+              avatar: const Icon(Icons.star_outline,
+                  size: 16, color: Colors.white),
+              label: Text('${usuario.xp} XP',
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold)),
               backgroundColor: const Color(0xFF764BA2),
@@ -44,29 +50,7 @@ class _AlunoHomeScreenState extends State<AlunoHomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
-            onPressed: () async {
-              final confirma = await showDialog<bool>(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Sair'),
-                  content: const Text('Deseja encerrar a sessão?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancelar')),
-                    TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Sair')),
-                  ],
-                ),
-              );
-              if (confirma == true && context.mounted) {
-                await context.read<AuthProvider>().logout();
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
-              }
-            },
+            onPressed: () => _confirmarSaida(context),
           ),
         ],
       ),
@@ -78,11 +62,32 @@ class _AlunoHomeScreenState extends State<AlunoHomeScreen> {
         selectedIndex: _tabIndex,
         onDestinationSelected: (i) => setState(() => _tabIndex = i),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.school), label: 'Trilhas'),
-          NavigationDestination(
-              icon: Icon(Icons.history), label: 'Histórico'),
+          NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Trilhas'),
+          NavigationDestination(icon: Icon(Icons.history), label: 'Histórico'),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmarSaida(BuildContext context) async {
+    final confirma = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Deseja encerrar a sessão?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Sair')),
+        ],
+      ),
+    );
+    if (confirma == true && context.mounted) {
+      await context.read<AuthProvider>().logout();
+      if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 }

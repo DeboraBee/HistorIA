@@ -1,17 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.database import get_db, init_db
 from app.schemas import GerarRequest, ResolverRequest, JogarRequest
 from app.ai_client import gerar_questoes
 from app.rabbitmq_publisher import publicar_resposta
 
-app = FastAPI(root_path="/exercicios")
-Instrumentator().instrument(app).expose(app)
 
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
+
+
+app = FastAPI(root_path="/exercicios", lifespan=lifespan)
+Instrumentator().instrument(app).expose(app)
 
 
 @app.post("/gerar")
@@ -28,6 +33,7 @@ def gerar(request: GerarRequest):
 def resolver(req: ResolverRequest):
     if req.resposta_usuario >= len(req.opcoes):
         raise HTTPException(status_code=400, detail="Resposta inválida")
+
     correta = req.resposta_usuario == req.resposta_correta
     return {"success": True, "data": {"correta": correta}}
 
@@ -39,7 +45,6 @@ def jogar(req: JogarRequest):
 
     correta = req.resposta_usuario == req.resposta_correta
 
-    # 1. Salva histórico local
     with get_db() as db:
         db.execute(
             """
@@ -51,7 +56,6 @@ def jogar(req: JogarRequest):
         )
         db.commit()
 
-    # 2. Publica evento — alunos e trilhas atualizam de forma assíncrona
     publicar_resposta(req.aluno_id, req.trilha_id, correta)
 
     return {"success": True, "data": {"correta": correta}}
@@ -62,7 +66,7 @@ def historico(aluno_id: int):
     with get_db() as db:
         respostas = db.execute(
             "SELECT * FROM respostas WHERE aluno_id = ? ORDER BY data DESC",
-            (aluno_id,)
+            (aluno_id,),
         ).fetchall()
 
     return {"success": True, "data": [dict(r) for r in respostas]}

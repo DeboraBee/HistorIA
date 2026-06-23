@@ -22,34 +22,18 @@ class _ProfessorHomeScreenState extends State<ProfessorHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('👨‍🏫 ${usuario.nome}'),
+        title: Row(
+          children: [
+            const Icon(Icons.cast_for_education_outlined, size: 20),
+            const SizedBox(width: 8),
+            Text(usuario.nome),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Sair',
-            onPressed: () async {
-              final confirma = await showDialog<bool>(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Sair'),
-                  content: const Text('Deseja encerrar a sessão?'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancelar')),
-                    TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Sair')),
-                  ],
-                ),
-              );
-              if (confirma == true && context.mounted) {
-                await context.read<AuthProvider>().logout();
-                if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
-              }
-            },
+            onPressed: () => _confirmarSaida(context),
           ),
         ],
       ),
@@ -58,10 +42,34 @@ class _ProfessorHomeScreenState extends State<ProfessorHomeScreen> {
         selectedIndex: _tabIndex,
         onDestinationSelected: (i) => setState(() => _tabIndex = i),
         destinations: const [
-          NavigationDestination(icon: Icon(Icons.school), label: 'Trilhas'),
-          NavigationDestination(icon: Icon(Icons.people), label: 'Alunos'),
+          NavigationDestination(
+              icon: Icon(Icons.route_outlined), label: 'Trilhas'),
+          NavigationDestination(
+              icon: Icon(Icons.people_outline), label: 'Alunos'),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmarSaida(BuildContext context) async {
+    final confirma = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Deseja encerrar a sessão?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Sair')),
+        ],
+      ),
+    );
+    if (confirma == true && context.mounted) {
+      await context.read<AuthProvider>().logout();
+      if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 }

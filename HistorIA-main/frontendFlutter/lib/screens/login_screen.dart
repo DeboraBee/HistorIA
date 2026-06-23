@@ -16,15 +16,12 @@ class _LoginScreenState extends State<LoginScreen>
   late final TabController _tabs;
   bool _loading = false;
 
-  // Login
   final _emailLoginCtrl = TextEditingController();
   final _senhaLoginCtrl = TextEditingController();
-
-  // Cadastro
-  final _nomeCtrl = TextEditingController();
-  final _emailCadCtrl = TextEditingController();
-  final _senhaCadCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
+  final _nomeCtrl       = TextEditingController();
+  final _emailCadCtrl   = TextEditingController();
+  final _senhaCadCtrl   = TextEditingController();
+  final _confirmCtrl    = TextEditingController();
   String _tipo = 'aluno';
 
   @override
@@ -62,8 +59,7 @@ class _LoginScreenState extends State<LoginScreen>
     }
     setState(() => _loading = true);
     try {
-      final tipo =
-          await context.read<AuthProvider>().login(email, senha);
+      final tipo = await context.read<AuthProvider>().login(email, senha);
       if (!mounted) return;
       Navigator.pushReplacementNamed(
           context, tipo == 'professor' ? '/professor' : '/aluno');
@@ -77,9 +73,9 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Future<void> _cadastrar() async {
-    final nome = _nomeCtrl.text.trim();
-    final email = _emailCadCtrl.text.trim();
-    final senha = _senhaCadCtrl.text;
+    final nome    = _nomeCtrl.text.trim();
+    final email   = _emailCadCtrl.text.trim();
+    final senha   = _senhaCadCtrl.text;
     final confirm = _confirmCtrl.text;
 
     if (nome.isEmpty || email.isEmpty || senha.isEmpty || confirm.isEmpty) {
@@ -127,9 +123,12 @@ class _LoginScreenState extends State<LoginScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('📚 HistorIA',
+                    const Icon(Icons.history_edu,
+                        size: 48, color: Color(0xFF667EEA)),
+                    const SizedBox(height: 8),
+                    const Text('HistorIA',
                         style: TextStyle(
-                            fontSize: 32,
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF667EEA))),
                     const SizedBox(height: 4),
@@ -166,14 +165,16 @@ class _LoginScreenState extends State<LoginScreen>
       children: [
         TextField(
           controller: _emailLoginCtrl,
-          decoration: const InputDecoration(labelText: 'Email'),
+          decoration: const InputDecoration(
+              labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _senhaLoginCtrl,
-          decoration: const InputDecoration(labelText: 'Senha'),
+          decoration: const InputDecoration(
+              labelText: 'Senha', prefixIcon: Icon(Icons.lock_outlined)),
           obscureText: true,
           onSubmitted: (_) => _login(),
         ),
@@ -201,35 +202,41 @@ class _LoginScreenState extends State<LoginScreen>
         children: [
           Row(
             children: [
-              _tipoCard('👨‍🎓', 'Aluno', 'aluno'),
+              _tipoCard(Icons.school_outlined, 'Aluno', 'aluno'),
               const SizedBox(width: 12),
-              _tipoCard('👨‍🏫', 'Professor', 'professor'),
+              _tipoCard(Icons.cast_for_education_outlined, 'Professor', 'professor'),
             ],
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _nomeCtrl,
-            decoration: const InputDecoration(labelText: 'Nome completo'),
+            decoration: const InputDecoration(
+                labelText: 'Nome completo',
+                prefixIcon: Icon(Icons.person_outlined)),
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _emailCadCtrl,
-            decoration: const InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(
+                labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _senhaCadCtrl,
-            decoration: const InputDecoration(labelText: 'Senha'),
+            decoration: const InputDecoration(
+                labelText: 'Senha', prefixIcon: Icon(Icons.lock_outlined)),
             obscureText: true,
             textInputAction: TextInputAction.next,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _confirmCtrl,
-            decoration: const InputDecoration(labelText: 'Confirmar senha'),
+            decoration: const InputDecoration(
+                labelText: 'Confirmar senha',
+                prefixIcon: Icon(Icons.lock_outlined)),
             obscureText: true,
             onSubmitted: (_) => _cadastrar(),
           ),
@@ -252,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _tipoCard(String emoji, String label, String value) {
+  Widget _tipoCard(IconData icon, String label, String value) {
     final selected = _tipo == value;
     return Expanded(
       child: GestureDetector(
@@ -267,7 +274,9 @@ class _LoginScreenState extends State<LoginScreen>
           ),
           child: Column(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 24)),
+              Icon(icon,
+                  size: 28,
+                  color: selected ? Colors.white : Colors.grey[600]),
               const SizedBox(height: 4),
               Text(label,
                   style: TextStyle(

@@ -1,17 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
+
 from app.database import get_db, init_db
-from app.schemas import AlunoCreate, AlunoUpdate, RespostaRequest
+from app.schemas import AlunoCreate, AlunoUpdate
 from app.rabbitmq_consumer import iniciar_consumer
 
-app = FastAPI(root_path="/alunos", docs_url="/docs", openapi_url="/openapi.json")
-Instrumentator().instrument(app).expose(app)
 
-
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
     iniciar_consumer()
+    yield
+
+
+app = FastAPI(root_path="/alunos", lifespan=lifespan)
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/")
@@ -27,7 +32,7 @@ def criar(aluno: AlunoCreate):
         try:
             cursor = db.execute(
                 "INSERT INTO alunos (nome, email) VALUES (?, ?)",
-                (aluno.nome, aluno.email)
+                (aluno.nome, aluno.email),
             )
             db.commit()
             return {"success": True, "data": {"id": cursor.lastrowid}}
@@ -78,25 +83,3 @@ def deletar(id: int):
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
 
     return {"success": True}
-
-
-@app.post("/responder")
-def responder(resposta: RespostaRequest):
-    with get_db() as db:
-        aluno = db.execute(
-            "SELECT * FROM alunos WHERE id = ?", (resposta.aluno_id,)
-        ).fetchone()
-
-        if not aluno:
-            raise HTTPException(status_code=404, detail="Aluno não encontrado")
-
-        xp_ganho = 10 if resposta.correta else 0
-        novo_xp = aluno["xp"] + xp_ganho
-
-        db.execute(
-            "UPDATE alunos SET xp = ? WHERE id = ?",
-            (novo_xp, resposta.aluno_id)
-        )
-        db.commit()
-
-    return {"success": True, "data": {"xp_ganho": xp_ganho, "xp_total": novo_xp}}

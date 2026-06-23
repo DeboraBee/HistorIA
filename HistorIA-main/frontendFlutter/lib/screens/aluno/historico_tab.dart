@@ -50,7 +50,8 @@ class _HistoricoTabState extends State<HistoricoTab> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(_erro!, style: const TextStyle(color: Colors.red)),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _carregar, child: const Text('Tentar novamente')),
+          ElevatedButton(
+              onPressed: _carregar, child: const Text('Tentar novamente')),
         ]),
       );
     }
@@ -72,9 +73,13 @@ class _HistoricoTabState extends State<HistoricoTab> {
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor:
-                    item.acertou ? Colors.green[100] : Colors.red[100],
-                child: Text(item.acertou ? '✅' : '❌',
-                    style: const TextStyle(fontSize: 18)),
+                    item.acertou ? Colors.green[50] : Colors.red[50],
+                child: Icon(
+                  item.acertou
+                      ? Icons.check_circle_outline
+                      : Icons.cancel_outlined,
+                  color: item.acertou ? Colors.green[700] : Colors.red[700],
+                ),
               ),
               title: Text(
                 item.pergunta.length > 60
@@ -83,6 +88,9 @@ class _HistoricoTabState extends State<HistoricoTab> {
                 style: const TextStyle(fontSize: 14),
               ),
               trailing: Chip(
+                avatar: Icon(Icons.star_outline,
+                    size: 14,
+                    color: item.acertou ? Colors.green[700] : Colors.grey),
                 label: Text(item.acertou ? '+10 XP' : '0 XP',
                     style: TextStyle(
                         color: item.acertou ? Colors.green[800] : Colors.grey,

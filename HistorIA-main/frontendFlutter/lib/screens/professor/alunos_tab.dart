@@ -44,17 +44,17 @@ class _AlunosTabState extends State<AlunosTab> {
     final confirma = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Deletar Aluno'),
+        title: const Text('Remover Aluno'),
         content: Text(
-            'Deseja deletar "${aluno.nome}"?\nEsta ação não pode ser desfeita.'),
+            'Deseja remover "${aluno.nome}"?\nEsta ação não pode ser desfeita.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: const Text('Cancelar')),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child:
-                  const Text('Deletar', style: TextStyle(color: Colors.red))),
+              child: const Text('Remover',
+                  style: TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -64,9 +64,8 @@ class _AlunosTabState extends State<AlunosTab> {
       final token = context.read<AuthProvider>().token!;
       await ApiService.deletarAluno(aluno.id, token);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('✅ Aluno deletado!'),
-            backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Aluno removido com sucesso.')));
         _carregar();
       }
     } on ApiException catch (e) {
@@ -78,7 +77,7 @@ class _AlunosTabState extends State<AlunosTab> {
   }
 
   void _abrirModalCriarAluno() {
-    final nomeCtrl = TextEditingController();
+    final nomeCtrl  = TextEditingController();
     final emailCtrl = TextEditingController();
 
     showModalBottomSheet(
@@ -102,13 +101,17 @@ class _AlunosTabState extends State<AlunosTab> {
             const SizedBox(height: 16),
             TextField(
               controller: nomeCtrl,
-              decoration: const InputDecoration(labelText: 'Nome completo'),
+              decoration: const InputDecoration(
+                  labelText: 'Nome completo',
+                  prefixIcon: Icon(Icons.person_outlined)),
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: emailCtrl,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined)),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
@@ -116,7 +119,7 @@ class _AlunosTabState extends State<AlunosTab> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  final nome = nomeCtrl.text.trim();
+                  final nome  = nomeCtrl.text.trim();
                   final email = emailCtrl.text.trim();
                   if (nome.isEmpty || email.isEmpty) return;
 
@@ -125,9 +128,9 @@ class _AlunosTabState extends State<AlunosTab> {
                     await ApiService.criarAluno(nome, email, token);
                     if (ctx.mounted) Navigator.pop(ctx);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('✅ Aluno criado!'),
-                          backgroundColor: Colors.green));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Aluno cadastrado com sucesso.')));
                       _carregar();
                     }
                   } on ApiException catch (e) {
@@ -138,7 +141,7 @@ class _AlunosTabState extends State<AlunosTab> {
                     }
                   }
                 },
-                child: const Text('Criar Aluno'),
+                child: const Text('Cadastrar'),
               ),
             ),
           ],
@@ -190,9 +193,12 @@ class _AlunosTabState extends State<AlunosTab> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Chip(
-                                    label: Text('⭐ ${a.xp} XP',
+                                    avatar: const Icon(Icons.star_outline,
+                                        size: 14),
+                                    label: Text('${a.xp} XP',
                                         style: const TextStyle(fontSize: 12)),
-                                    backgroundColor: const Color(0xFFEEF0FF),
+                                    backgroundColor:
+                                        const Color(0xFFEEF0FF),
                                   ),
                                   const SizedBox(width: 4),
                                   IconButton(
@@ -209,7 +215,7 @@ class _AlunosTabState extends State<AlunosTab> {
                     ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _abrirModalCriarAluno,
-        icon: const Icon(Icons.person_add),
+        icon: const Icon(Icons.person_add_outlined),
         label: const Text('Novo Aluno'),
       ),
     );
