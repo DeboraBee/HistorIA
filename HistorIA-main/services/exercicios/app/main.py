@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from app.database import get_db, init_db
-from app.schemas import GerarRequest, JogarRequest
+from app.schemas import GerarRequest, ResolverRequest, JogarRequest
 from app.ai_client import gerar_questoes
 from app.rabbitmq_publisher import publicar_resposta
 
 app = FastAPI(root_path="/exercicios")
+Instrumentator().instrument(app).expose(app)
 
 
 @app.on_event("startup")
@@ -20,6 +22,14 @@ def gerar(request: GerarRequest):
         raise HTTPException(status_code=500, detail="Erro ao gerar questões")
 
     return {"success": True, "data": questoes}
+
+
+@app.post("/resolver")
+def resolver(req: ResolverRequest):
+    if req.resposta_usuario >= len(req.opcoes):
+        raise HTTPException(status_code=400, detail="Resposta inválida")
+    correta = req.resposta_usuario == req.resposta_correta
+    return {"success": True, "data": {"correta": correta}}
 
 
 @app.post("/jogar")

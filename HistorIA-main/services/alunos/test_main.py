@@ -43,7 +43,7 @@ class TestAlunosAPI:
             "nome": "João Silva",
             "email": "joao@example.com"
         })
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["success"] is True
         assert "id" in data["data"]
@@ -98,7 +98,7 @@ class TestAlunosAPI:
         ids = []
         for aluno in alunos:
             response = client.post("/", json=aluno)
-            assert response.status_code == 200
+            assert response.status_code == 201
             ids.append(response.json()["data"]["id"])
         
         # Verifica que todos foram criados com IDs diferentes
@@ -121,11 +121,9 @@ class TestAlunosAPI:
         })
         assert response1.status_code == 200
         
-        # Segunda criação com mesmo email (comportamento pode variar)
-        # Este teste documenta o comportamento atual
+        # Segunda criação com mesmo email deve ser rejeitada
         response2 = client.post("/", json={
             "nome": "Segundo",
             "email": email
         })
-        # Atualmente permite, mas poderia ser uma melhoria
-        assert response2.status_code == 200
+        assert response2.status_code == 400

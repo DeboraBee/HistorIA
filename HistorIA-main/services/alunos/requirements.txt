@@ -3,6 +3,7 @@ uvicorn
 pydantic[email]
 email-validator
 pika
+prometheus-fastapi-instrumentator
 pytest
 pytest-asyncio
 httpx

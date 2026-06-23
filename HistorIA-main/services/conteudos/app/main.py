@@ -1,8 +1,10 @@
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 import json
 import os
 
 app = FastAPI(root_path="/conteudos")
+Instrumentator().instrument(app).expose(app)
 
 @app.get("/trilhas")
 def listar_trilhas():

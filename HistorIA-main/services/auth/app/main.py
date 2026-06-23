@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import get_db, init_db
 from app.schemas import UsuarioCreate, LoginRequest, LoginResponse, UsuarioResponse
 from app.security import hash_senha, verificar_senha, criar_token, decodificar_token
 
 app = FastAPI(root_path="/auth")
+Instrumentator().instrument(app).expose(app)
 bearer = HTTPBearer()
 
 

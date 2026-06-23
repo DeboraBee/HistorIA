@@ -3,6 +3,7 @@ uvicorn
 python-dotenv
 sqlalchemy
 pika
+prometheus-fastapi-instrumentator
 pytest
 pytest-asyncio
 httpx

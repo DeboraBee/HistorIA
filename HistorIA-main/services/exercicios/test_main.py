@@ -99,7 +99,7 @@ class TestExerciciosAPI:
         assert response.status_code == 400
         assert "Resposta inválida" in response.json()["detail"]
     
-    @patch('app.rabbitmq_publisher.publicar_resposta')
+    @patch('app.main.publicar_resposta')
     def test_jogar_resposta_correta(self, mock_publicar, client):
         """Testa fluxo de jogo com resposta correta"""
         mock_publicar.return_value = None

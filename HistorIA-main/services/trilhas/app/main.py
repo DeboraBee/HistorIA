@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from app.database import get_db, init_db
 from app.schemas import TrilhaCreate, FaseCreate, ProgressoCreate, AvancarRequest
 from app.rabbitmq_consumer import iniciar_consumer
 
-app = FastAPI(
-    root_path="/trilhas",
-    docs_url="/docs",
-    openapi_url="/openapi.json"
-)
+app = FastAPI(root_path="/trilhas", docs_url="/docs", openapi_url="/openapi.json")
+Instrumentator().instrument(app).expose(app)
 
 
 @app.on_event("startup")
