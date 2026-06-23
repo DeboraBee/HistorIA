@@ -3,27 +3,24 @@ import sqlite3
 import os
 from fastapi.testclient import TestClient
 from app.main import app
-from app.database import init_db
+from app.database import init_db, DB_NAME
 
 @pytest.fixture(autouse=True)
 def setup_teardown():
     """Limpa o banco antes e depois de cada teste"""
-    # Remove banco existente se houver
     try:
-        if os.path.exists("database.db"):
-            os.remove("database.db")
+        if os.path.exists(DB_NAME):
+            os.remove(DB_NAME)
     except:
         pass
-    
-    # Inicializa novo banco
+
     init_db()
-    
+
     yield
-    
-    # Limpeza após teste
+
     try:
-        if os.path.exists("database.db"):
-            os.remove("database.db")
+        if os.path.exists(DB_NAME):
+            os.remove(DB_NAME)
     except:
         pass
 

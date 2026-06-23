@@ -3,17 +3,16 @@ import os
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from app.main import app
-from app.database import init_db
+from app.database import init_db, DB_NAME
 
 @pytest.fixture(autouse=True)
 def setup_db():
     """Inicializa banco antes de cada teste"""
     init_db()
     yield
-    # Limpeza
     try:
-        if os.path.exists("database.db"):
-            os.remove("database.db")
+        if os.path.exists(DB_NAME):
+            os.remove(DB_NAME)
     except:
         pass
 
@@ -25,7 +24,7 @@ def client():
 class TestExerciciosAPI:
     """Testes para o serviço de Exercícios"""
     
-    @patch('app.ai_client.gerar_questoes')
+    @patch('app.main.gerar_questoes')
     def test_gerar_questoes_sucesso(self, mock_gerar, client):
         """Testa geração de questões com sucesso"""
         mock_gerar.return_value = [
@@ -35,25 +34,27 @@ class TestExerciciosAPI:
                 "resposta_correta": 0
             }
         ]
-        
+
         response = client.post("/gerar", json={
             "tema": "História Europeia",
             "quantidade": 1
         })
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
         assert len(data["data"]) == 1
-    
-    def test_gerar_questoes_estrutura(self, client):
+
+    @patch('app.main.gerar_questoes')
+    def test_gerar_questoes_estrutura(self, mock_gerar, client):
         """Testa que endpoint /gerar funciona"""
+        mock_gerar.return_value = [{"pergunta": "Q", "opcoes": ["A", "B"], "resposta_correta": 0}]
+
         response = client.post("/gerar", json={
             "tema": "História",
             "quantidade": 1
         })
-        
-        # Endpoint funciona mesmo que com IA verdadeira
+
         assert response.status_code == 200
         data = response.json()
         assert "success" in data

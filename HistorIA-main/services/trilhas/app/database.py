@@ -1,7 +1,8 @@
+import os
 import sqlite3
 from contextlib import contextmanager
 
-DB_NAME = "/app/data/trilhas.db"
+DB_NAME = "/app/data/trilhas.db" if os.path.exists("/app/data") else "trilhas.db"
 
 
 @contextmanager
